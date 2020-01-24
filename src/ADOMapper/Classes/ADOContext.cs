@@ -30,7 +30,10 @@ namespace ADO.Mapper.Classes
                 CN.CursorLocation = CursorLocationEnum.adUseClient;
                 CN.ConnectionString = ConnectionString;
                 CN.Open();
+                CN.Execute("SET GROUP_CONCAT_MAX_LEN=1000000;", out _);
             }
+
+
         }
 
         /// <summary>
@@ -74,7 +77,6 @@ namespace ADO.Mapper.Classes
                 throw new Exception("Erro na função ADODBContext.MyExecute(), Mensagem: " + ex.Message);
             }
         }
-
         #endregion
     }
 }

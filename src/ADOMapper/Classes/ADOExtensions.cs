@@ -22,6 +22,9 @@ namespace ADO.Mapper.Classes
                 dynamic result;
                 var type = typeof(T);
 
+                if (!rs.CheckFieldExists(field))
+                    throw new ArgumentOutOfRangeException(string.Format("O campo {0} não foi encontrado dentro do contexto do recordset, verifique", field));
+
                 // estando nulo, retorna o valor default
                 if (rs.Fields[field].Value is DBNull || rs.Fields[field].Value == null)
                     return defaultVal;
@@ -75,14 +78,14 @@ namespace ADO.Mapper.Classes
         /// <param name="listClass"></param>
         /// <param name="rs"></param>
         /// <returns></returns>
-        public static List<T> BindListFromRS<T>(this List<T> listClass, Recordset rs)
+        public static List<T> BindList<T>(this List<T> listClass, Recordset rs)
         {
 
             while (!rs.EOF)
             {
                 T obj = (T)Activator.CreateInstance(typeof(T));
 
-                listClass.Add(obj.BindClassFromRS(ref rs));
+                listClass.Add(obj.BindClass(ref rs));
                 rs.MoveNext();
             }
 
@@ -96,7 +99,7 @@ namespace ADO.Mapper.Classes
         /// <param name="targetClass"></param>
         /// <param name="rs"></param>
         /// <returns></returns>
-        public static T BindClassFromRS<T>(this T targetClass, ref Recordset rs)
+        public static T BindClass<T>(this T targetClass, ref Recordset rs)
         {
             if (!rs.EOF)
             {
@@ -109,9 +112,11 @@ namespace ADO.Mapper.Classes
                     Type typeProp;
                     typeProp = Type.GetType(property.PropertyType.ToString());
 
-                    var defaultValue = typeProp.GetDefault();
-                    string fieldName = property.Name;
 
+                    string fieldName = property.Name;
+                    bool ignoreBindField = false;
+                    bool customDefaultValue = false;
+                    dynamic defaultValue = null;
 
                     // pego todos os atributos, caso tenha
                     foreach (object atr in atributes)
@@ -128,7 +133,15 @@ namespace ADO.Mapper.Classes
                                         fieldName = atribute.FieldName == "" ? property.Name : atribute.FieldName;
 
                                     if (atribute.DefaultValue != null)
+                                    {
+                                        customDefaultValue = true;
                                         defaultValue = atribute.DefaultValue;
+                                    }
+                                       
+
+                                    if (atribute.IgnoreField != false)
+                                        ignoreBindField = true;
+
                                 }
 
                             }
@@ -136,18 +149,41 @@ namespace ADO.Mapper.Classes
                         }
                     }
 
-                    dynamic obj = ADOUtil.GetValFromRS(rs, fieldName, defaultValue, typeProp);
+                    // se ainda está nada, tento setar um valor default
+                    if(!ignoreBindField && !customDefaultValue && defaultValue == null)
+                    {
+                        defaultValue = typeProp.GetDefault();
+                    }
+                   
 
-
-                    property.SetValue(targetClass, obj);
+                    if (!ignoreBindField)
+                    {
+                        property.SetValue(targetClass, ADOUtil.GetValFromRS(rs, fieldName, defaultValue, typeProp));
+                    }
                 }
 
                 return targetClass;
-
             }
 
             return default;
         }
 
+
+        /// <summary>
+        /// Faço uma busca a fim de verificar se esse field existe na coleção
+        /// </summary>
+        /// <param name="rs"></param>
+        /// <param name="field"></param>
+        /// <returns></returns>
+        public static bool CheckFieldExists(this Recordset rs, string field)
+        {
+            foreach (Field f in rs.Fields)
+            {
+                if (f.Name.ToString().ToLower().Equals(field.ToLower()))
+                    return true;
+            }
+
+            return false;
+        }
     }
 }

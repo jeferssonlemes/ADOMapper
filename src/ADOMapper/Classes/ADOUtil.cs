@@ -22,6 +22,10 @@ namespace ADO.Mapper.Classes
             {
                 dynamic result;
 
+                // verifico se o campo existe
+                if (!rs.CheckFieldExists(field))
+                    throw new ArgumentOutOfRangeException(string.Format("O campo {0} não foi encontrado dentro do contexto do recordset, verifique", field));
+
                 // estando nulo, retorna o valor default
                 if (rs.Fields[field].Value is DBNull || rs.Fields[field].Value == null)
                     return defaultVal;
@@ -88,6 +92,12 @@ namespace ADO.Mapper.Classes
                 default:
                     throw new NotImplementedException("Opção não encontrada");
             }
+        }
+
+
+        public static long GetLastInsertId()
+        {
+            return ADOContext.MyExecute("SELECT LAST_INSERT_ID() ID").GetVal<long>("ID");
         }
 
         #endregion

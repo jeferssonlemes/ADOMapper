@@ -7,6 +7,7 @@ namespace ADO.Mapper.Classes
     {
         public string FieldName;
         public object DefaultValue = default;
+        public bool IgnoreField = false;
         public ADOMap() { }
     }
 }

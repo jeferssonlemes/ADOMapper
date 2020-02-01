@@ -30,7 +30,7 @@ namespace ADO.Mapper.Classes
                 Field fieldValue = rs.Fields[field];
 
                 // caso tenha perdido a referência após a 1ª referência
-                if (originalValue != null && (fieldValue.Value is DBNull || fieldValue.Value == null))
+                if (!(originalValue is DBNull) && (fieldValue.Value is DBNull || fieldValue.Value == null))
                 {
                     result = GetValField(originalValue);
                 }

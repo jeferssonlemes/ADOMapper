@@ -62,7 +62,7 @@ namespace ADO.Test
         [TestMethod]
         public void TesteTabela()
         {
-            Recordset rs = ADOContext.MyExecute("SELECT * FROM custom_rede_credenciada c WHERE c.ST_REGISTRO = 'G' AND c.ID_EMPRESA = 1 AND c.CLASSIFICACAO_REDE_CREDENCIADA_ID = 1");
+            Recordset rs = ADOContext.MyExecute("SELECT * FROM custom_rede_credenciada c WHERE c.ST_REGISTRO = 'G' AND c.ID_EMPRESA = 1 AND c.ID_CUSTOM_REDE_CREDENCIADA_ID = 3");
 
             var myClass = new ClassRedeCredenciadoLiteModel().BindClass(ref rs);
 

@@ -6,7 +6,7 @@ using System.Text;
 namespace ADO.Mapper.Classes
 {
     public static class ADOUtil
-    {       
+    {
         #region methods ADO
         /// <summary>
         /// Função para buscar valor de um campo recordset dinamicamente
@@ -26,12 +26,24 @@ namespace ADO.Mapper.Classes
                 if (!rs.CheckFieldExists(field))
                     throw new ArgumentOutOfRangeException(string.Format("O campo {0} não foi encontrado dentro do contexto do recordset, verifique", field));
 
-                // estando nulo, retorna o valor default
-                if (rs.Fields[field].Value is DBNull || rs.Fields[field].Value == null)
-                    return defaultVal;
+                var originalValue = rs.Fields[field].Value;
+                Field fieldValue = rs.Fields[field];
 
-                // busco o valor do ADO Field
-                result = GetValField(rs.Fields[field]);
+                // caso tenha perdido a referência após a 1ª referência
+                if (originalValue != null && (fieldValue.Value is DBNull || fieldValue.Value == null))
+                {
+                    result = GetValField(originalValue);
+                }
+                else
+                {
+                    // estando nulo, retorna o valor default
+                    if (fieldValue.Value is DBNull || fieldValue.Value == null)
+                        return defaultVal;
+
+                    // busco o valor do ADO Field
+                    result = GetValField(fieldValue);
+                }
+
 
                 // verificar se isso ta passando
                 if (tipoCastFinal.IsGenericType && tipoCastFinal.GetGenericTypeDefinition().Equals(typeof(Nullable<>)))
@@ -94,6 +106,52 @@ namespace ADO.Mapper.Classes
             }
         }
 
+        /// <summary>
+        /// Retorna o valor do field dinamicamente
+        /// </summary>
+        /// <param name="field"></param>
+        /// <returns></returns>
+        public static dynamic GetValField(object field)
+        {
+            switch (field.GetType().ToString())
+            {
+                case "System.Boolean":
+                    return (bool)field;
+                case "System.Byte":
+                    return (byte)field;
+                case "System.SByte":
+                    return (sbyte)field;
+                case "System.Char":
+                    return (char)field;
+                case "System.Decimal":
+                    return (decimal)field;
+                case "System.Double":
+                    return (double)field;
+                case "System.Single":
+                    return (float)field;
+                case "System.Int32":
+                    return (int)field;
+                case "System.UInt32":
+                    return (uint)field;
+                case "System.Int64":
+                    return (long)field;
+                case "System.UInt64":
+                    return (ulong)field;
+                case "System.Object":
+                    return (object)field;
+                case "System.Int16":
+                    return (short)field;
+                case "System.UInt16":
+                    return (ushort)field;
+                case "System.String":
+                    return (string)field;
+                case "System.DateTime":
+                    return (DateTime)field;
+                default:
+                    throw new NotImplementedException("Opção não encontrada");
+            }
+        }
+
 
         public static long GetLastInsertId()
         {
@@ -104,4 +162,4 @@ namespace ADO.Mapper.Classes
     }
 
 }
- 
+

@@ -11,7 +11,7 @@ namespace ADO.Test
 
         public UnitTest()
         {
-            ADOContext.ConnectionString = "Driver={MySQL ODBC 5.3 ANSI Driver};Server=localhost;DataBase=zapinho;Uid=root;Pwd=bdcs;port=3308;Option=3;";
+            ADOContext.ConnectionString = "Driver={MySQL ODBC 5.3 ANSI Driver};Server=localhost;DataBase=base_mix_31122019;Uid=root;Pwd=bdcs;port=3308;Option=3;";
         }
 
         [TestMethod]
@@ -56,8 +56,28 @@ namespace ADO.Test
 
             var myClass = new Sabores().BindClass(ref rs);
 
-            Assert.IsNull(myClass.id_sabor_id);
+            Assert.IsNotNull(myClass.id_sabor_id);
         }
+
+        [TestMethod]
+        public void TesteTabela()
+        {
+            Recordset rs = ADOContext.MyExecute("SELECT * FROM custom_rede_credenciada c WHERE c.ST_REGISTRO = 'G' AND c.ID_EMPRESA = 1 AND c.CLASSIFICACAO_REDE_CREDENCIADA_ID = 1");
+
+            var myClass = new ClassRedeCredenciadoLiteModel().BindClass(ref rs);
+
+            Assert.IsNotNull(myClass.ClassificacaoRedeCredenciadaId);
+        }
+
+        public class ClassRedeCredenciadoLiteModel
+        {
+            [ADOMap(FieldName = "ID_CUSTOM_REDE_CREDENCIADA_ID")] public int Id { get; set; }
+            [ADOMap(FieldName = "NOME")] public string Nome { get; set; }
+            [ADOMap(FieldName = "CLASSIFICACAO_REDE_CREDENCIADA_ID")] public int ClassificacaoRedeCredenciadaId { get; set; }
+            [ADOMap(IgnoreField = true)] public Byte[] Imagem { get; set; }
+            [ADOMap(FieldName = "IMAGEM_PERFIL")] public string ImagemStr { get; set; }
+        }
+
 
         public class Sabores
         {

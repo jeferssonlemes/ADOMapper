@@ -27,10 +27,17 @@ namespace ADO.Mapper.Classes
             if (CN == null || CN.State != 1)
             {
                 CN = new Connection();
-                CN.CursorLocation = CursorLocationEnum.adUseClient;
+                CN.CursorLocation = CursorLocationEnum.adUseServer;
                 CN.ConnectionString = ConnectionString;
+                CN.IsolationLevel = IsolationLevelEnum.adXactReadCommitted;
+                CN.ConnectionTimeout = 15;
+                CN.Mode = ConnectModeEnum.adModeReadWrite;
+                CN.CommandTimeout = 30;
                 CN.Open();
-                CN.Execute("SET GROUP_CONCAT_MAX_LEN=1000000;", out _);
+                // tamanho maximo do group concat
+                CN.Execute("SET GROUP_CONCAT_MAX_LEN=1000000", out _);
+                //max seta no banco tamanho arquivo 16 mb.
+                CN.Execute("SET GLOBAL max_allowed_packet=16777216", out _);
             }
 
 
@@ -77,6 +84,7 @@ namespace ADO.Mapper.Classes
                 throw new Exception("Erro na função ADODBContext.MyExecute(), Mensagem: " + ex.Message);
             }
         }
+
         #endregion
     }
 }

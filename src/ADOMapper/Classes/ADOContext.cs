@@ -66,9 +66,9 @@ namespace ADO.Mapper.Classes
         /// <returns></returns>
         public static Recordset MyExecute(string sql)
         {
-            if (CN == null) // não estando aberto, abro
-                OpenConnection();
-
+            CloseConnection();
+            OpenConnection();
+                       
             try
             {
                 // marco a execução como assyncrona
